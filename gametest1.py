@@ -13,7 +13,10 @@ GREEN = (0, 255, 0)
 MAGENTA = (255, 0, 255)
 CYAN = (0, 255, 255)
 BLACK = (0, 0, 0)
-COLORS = [RED, BLUE, YELLOW, GREEN, MAGENTA, CYAN]
+GRAY = (125, 125, 125)
+WHITE = (255, 255, 255)
+
+COLORS = [RED, BLUE, YELLOW, GREEN, MAGENTA, CYAN, GRAY, WHITE]
 score = int(0) #счёт
 kol = 6 #количество шариков
 
@@ -25,6 +28,7 @@ v_x = []
 v_y = []
 color = []
 time = [] #время жизни шарика
+type = [] #тип шарика
 '''Генерируем шарики:'''
 for i in range(kol):
     x.append(randint(100, 1100))
@@ -32,8 +36,11 @@ for i in range(kol):
     r.append(randint(20, 100))
     v_x.append(randint(-10, 10))
     v_y.append(randint(-10, 10))
-    color.append(COLORS[randint(0, 5)])
+    color.append(COLORS[randint(0, 7)])
     time.append(0)
+    type.append(randint(0, 10))
+
+
 
 
 def new_balls():
@@ -49,8 +56,9 @@ def new_ball(j):
     r[j] = randint(20,100)
     v_x[j] = randint(-10,10)
     v_y[j] = randint(-10,10)
-    color[j] = COLORS[randint(0,5)]
     time[j] = 0
+    color[j] = COLORS[randint(0, 7)]
+    type[j] = randint(0, 10)
     circle(screen, color[j], (x[j], y[j]), r[j])
 
 
@@ -83,6 +91,8 @@ while not finished:
     clock.tick(FPS)
     for j in range(kol):
         time[j] += 1
+        if (type[j] >8) & (time[j]%2 == 0):
+            color[j] = COLORS[randint(0, 7)]
     update_position(time)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -90,9 +100,13 @@ while not finished:
         elif event.type == pygame.MOUSEBUTTONDOWN:
             for j in range(kol):
                 if(click(event.pos[0], event.pos[1], j)):
+                    if type[j] > 8:
+                        score += 2
+                        print("Вы поймали легендарный шарик! Счёт: ", score)
+                    else:
+                        score += 1
+                        print("Счёт: ", score)
                     new_ball(j)
-                    score += 1
-                    print("Счёт: ", score)
     pygame.display.update()
 
 
