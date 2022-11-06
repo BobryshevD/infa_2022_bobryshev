@@ -4,7 +4,7 @@ import math
 from random import randint
 pygame.init()
 
-FPS = 2
+FPS = 1
 screen = pygame.display.set_mode((1200, 900))
 
 RED = (255, 0, 0)
