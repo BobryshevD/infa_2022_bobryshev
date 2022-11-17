@@ -15,7 +15,7 @@ BLACK = (0, 0, 0)
 WHITE = 0xFFFFFF
 GREY = 0x7D7D7D
 GAME_COLORS = [RED, BLUE, YELLOW, GREEN, MAGENTA, CYAN]
-
+score = 0
 
 WIDTH = 800
 HEIGHT = 600
@@ -82,11 +82,14 @@ class Ball:
         else:
             return False
 
-    def live_test(balls):
-        for b in balls:
-            b.draw()
-            if b.live == 0:
-                balls.remove(b)
+
+def balls_live_test(balls):
+    """Удаляет шарики, у которых self.live = 0"""
+    global b
+    for b in balls:
+        b.draw()
+        if b.live == 0:
+            balls.remove(b)
 
 
 class Gun:
@@ -149,34 +152,39 @@ class Target:
         self.x = 0
         self.y = 0
         self.r = 0
+        self.vx = 0
+        self.vy = 0
         self.color = RED
         self.time = 0
         self.new_target()
 
     def new_target(self):
         """ Инициализация новой цели. """
-        x = self.x = randint(600, 780)
+        x = self.x = randint(550, 745)
         y = self.y = randint(200, 400)
         r = self.r = randint(5, 50)
+        vx = self.vx = randint(-5, 5)
+        vy = self.vy = randint(-5, 5)
         self.live = 1
         self.time = 0
         color = self.color = RED
 
-    def hit(self, points=1):
+    def hit(self):
         """Попадание шарика в цель."""
-        self.points += points
-        print("Попадание! Очки:", self.points)
+        global score
+        score += 1
+        print("Попадание! Очки:", score)
 
     def score_draw(self):
-        """Выводи счёт на экран"""
+        """Выводит счёт на экран"""
         global bullet, b
         for b in balls:
-            if b.hittest(target) and self.live:
-                self.time = 1
+            if b.hittest(self) and self.live:
+                self.time += 1
                 self.live = 0
                 self.hit()
             if (self.time > 0) and (self.time < 120):
-                text = font.render(f'Попадание за {bullet} попытку', True, BLACK)
+                text = font.render(f'Попадание за {bullet} попыток', True, BLACK)
                 screen.blit(text, (200, 250))
                 self.time += 1
             if self.time == 120:
@@ -184,12 +192,32 @@ class Target:
                 self.new_target()
                 bullet = 0
 
-
     def draw(self):
         """Рисует цель"""
         if self.live != 0:
             pygame.draw.circle(screen, self.color, (self.x, self.y), self.r)
+            if (self.x+self.r > 800) or (self.x-self.r < 400):
+                self.vx = -self.vx
+            if (self.y+self.r > 550) or (self.y-self.r < 0):
+                self.vy = -self.vy
+            self.x += self.vx
+            self.y += self.vy
 
+
+def spawn_targets():
+    """Создаёт цели"""
+    target1 = Target()
+    targets.append(target1)
+    target2 = Target()
+    targets.append(target2)
+
+
+def draw_targets(targets):
+    """"Рисует цели, проверяет на попадание"""
+    for target in targets:
+        target.draw()
+    for target in targets:
+        target.score_draw()
 
 
 pygame.init()
@@ -197,18 +225,20 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 font = pygame.font.SysFont('arial', 50)
 bullet = 0
 balls = []
+targets = []
+
 
 clock = pygame.time.Clock()
 gun = Gun(screen)
-target = Target()
+spawn_targets()
+#target = Target()
 finished = False
 
 while not finished:
     screen.fill(WHITE)
     gun.draw()
-    target.draw()
-    Ball.live_test(balls)
-    target.score_draw()
+    draw_targets(targets)
+    balls_live_test(balls)
     pygame.display.update()
     clock.tick(FPS)
     for event in pygame.event.get():
