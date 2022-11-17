@@ -204,12 +204,51 @@ class Target:
             self.y += self.vy
 
 
+class GreenTarget(Target):
+    """"Зелёная цель; постояноо разгоняется, но при достижении скоростью определённой отметки останавливается и разгоняется заново"""
+    def new_target(self):
+        """ Инициализация новой цели. """
+        x = self.x = randint(550, 745)
+        y = self.y = randint(200, 400)
+        r = self.r = randint(5, 50)
+        vx = self.vx = randint(-5, 5)
+        vy = self.vy = randint(-5, 5)
+        self.live = 1
+        self.time = 0
+        color = self.color = GREEN
+
+    def draw(self):
+        """Рисует цель"""
+        if self.live != 0:
+            pygame.draw.circle(screen, self.color, (self.x, self.y), self.r)
+            if (self.x+self.r > 800) or (self.x-self.r < 400):
+                self.vx = -self.vx
+            if (self.y+self.r > 550) or (self.y-self.r < 0):
+                self.vy = -self.vy
+            if self.vx > 0:
+                self.vx += 0.1
+            else:
+                self.vx -= 0.1
+            if self.vy > 0:
+                self.vy += 0.1
+            else:
+                self.vy -= 0.1
+            if self.vx**2 > 500:
+                self.vx = 0
+            if self.vy**2 > 500:
+                self.vy = 0
+            self.x += self.vx
+            self.y += self.vy
+
+
 def spawn_targets():
     """Создаёт цели"""
     target1 = Target()
     targets.append(target1)
     target2 = Target()
     targets.append(target2)
+    target3 = GreenTarget()
+    targets.append(target3)
 
 
 def draw_targets(targets):
