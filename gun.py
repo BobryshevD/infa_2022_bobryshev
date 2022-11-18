@@ -126,8 +126,8 @@ class Gun:
         if ball_type == 1:
             new_ball.r += 2
             self.an = math.atan2((event.pos[1]-new_ball.y), (event.pos[0]-new_ball.x))
-            new_ball.vx = 2*self.f2_power * math.cos(self.an)
-            new_ball.vy = - 2*self.f2_power * math.sin(self.an)
+            new_ball.vx = 1.5*self.f2_power * math.cos(self.an)
+            new_ball.vy = - 1.5*self.f2_power * math.sin(self.an)
             new_ball.color = CYAN
             balls.append(new_ball)
         if ball_type == 2:
@@ -229,8 +229,15 @@ class Target:
                 self.live = 0
                 self.hit()
             if (self.time > 0) and (self.time < 120):
-                text = font.render(f'Попадание за {bullet} попыток', True, BLACK)
-                screen.blit(text, (200, 250))
+                if (bullet % 10 == 1) & (bullet != 11):
+                    text = font.render(f'Попадание за {bullet} попытку', True, BLACK)
+                    screen.blit(text, (200, 250))
+                elif (bullet % 10 == 2 | bullet % 10 | 3 or bullet % 10 | 4 & bullet > 19) | (bullet == 3) | (bullet == 4) | (bullet == 2):
+                    text = font.render(f'Попадание за {bullet} попытки', True, BLACK)
+                    screen.blit(text, (200, 250))
+                else:
+                    text = font.render(f'Попадание за {bullet} попыткок', True, BLACK)
+                    screen.blit(text, (200, 250))
                 self.time += 1
             if self.time == 120:
                 self.time = 0
@@ -356,12 +363,18 @@ def draw_targets(targets):
 
 def print_ball_type():
     text = font.render(f'Тип снаряда: {ball_type}', True, BLACK)
-    screen.blit(text, (0, 550))
+    screen.blit(text, (0, 560))
+
+
+def info():
+    text = font_small.render('Передвижение танка: WASD, смена типа снаряда - ПКМ', True, BLACK)
+    screen.blit(text, (362, 580))
 
 
 pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
-font = pygame.font.SysFont('arial', 50)
+font = pygame.font.SysFont('arial', 40)
+font_small = pygame.font.SysFont('arial', 20)
 bullet = 0
 balls = []
 targets = []
@@ -379,6 +392,7 @@ while not finished:
     draw_targets(targets)
     balls_live_test(balls)
     print_ball_type()
+    info()
     pygame.display.update()
     clock.tick(FPS)
     for event in pygame.event.get():
