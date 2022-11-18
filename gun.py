@@ -14,6 +14,12 @@ CYAN = 0x00FFCC
 BLACK = (0, 0, 0)
 WHITE = 0xFFFFFF
 GREY = 0x7D7D7D
+LIME = (180, 255, 100)
+PINK = (255, 100, 180)
+PURPLE = (240, 0, 255)
+BROWN = (100, 40, 0)
+RUST = (210, 150, 75)
+MARROON = (115, 0, 0)
 GAME_COLORS = [RED, BLUE, YELLOW, GREEN, MAGENTA, CYAN]
 score = 0
 
@@ -35,7 +41,7 @@ class Ball:
         self.r = 10
         self.vx = 0
         self.vy = 0
-        self.color = choice(GAME_COLORS)
+        self.color = CYAN
         self.live = 30
 
     def move(self):
@@ -83,6 +89,8 @@ class Ball:
             return False
 
 
+
+
 def balls_live_test(balls):
     """Удаляет шарики, у которых self.live = 0"""
     global b
@@ -115,11 +123,27 @@ class Gun:
         global balls, bullet
         bullet += 1
         new_ball = Ball(self.screen, self.x, self.y)
-        new_ball.r += 5
-        self.an = math.atan2((event.pos[1]-new_ball.y), (event.pos[0]-new_ball.x))
-        new_ball.vx = self.f2_power * math.cos(self.an)
-        new_ball.vy = - self.f2_power * math.sin(self.an)
-        balls.append(new_ball)
+        if ball_type == 1:
+            new_ball.r += 2
+            self.an = math.atan2((event.pos[1]-new_ball.y), (event.pos[0]-new_ball.x))
+            new_ball.vx = 2*self.f2_power * math.cos(self.an)
+            new_ball.vy = - 2*self.f2_power * math.sin(self.an)
+            new_ball.color = CYAN
+            balls.append(new_ball)
+        if ball_type == 2:
+            new_ball.r += 5
+            self.an = math.atan2((event.pos[1] - new_ball.y), (event.pos[0] - new_ball.x))
+            new_ball.vx = self.f2_power * math.cos(self.an)
+            new_ball.vy = -self.f2_power * math.sin(self.an)
+            new_ball.color = PURPLE
+            balls.append(new_ball)
+        if ball_type == 3:
+            new_ball.r += 9
+            self.an = math.atan2((event.pos[1] - new_ball.y), (event.pos[0] - new_ball.x))
+            new_ball.vx = 0.6 * self.f2_power * math.cos(self.an)
+            new_ball.vy = -0.6* self.f2_power * math.sin(self.an)
+            new_ball.color = MARROON
+            balls.append(new_ball)
         self.f2_on = 0
         self.f2_power = 10
 
@@ -138,11 +162,11 @@ class Gun:
     def draw(self):
         pygame.draw.rect(self.screen, self.color_corp, (self.x - 35, self.y - 35, 55, 70))
         pygame.draw.line(self.screen, self.color, (self.x, self.y), (self.x+5*self.f2_power*math.cos(self.an), self.y+5*self.f2_power*math.sin(self.an)), 25)
-        
+
 
     def power_up(self):
         if self.f2_on:
-            if self.f2_power < 70:
+            if self.f2_power < 50:
                 self.f2_power += 1
             self.color = RED
         else:
@@ -163,6 +187,7 @@ class Gun:
     def gun_move_y_down(self):
         if self.y <= 475:
             self.y += 5
+
 
 
 class Target:
@@ -329,18 +354,23 @@ def draw_targets(targets):
         target.score_draw()
 
 
+def print_ball_type():
+    text = font.render(f'Тип снаряда: {ball_type}', True, BLACK)
+    screen.blit(text, (0, 550))
+
+
 pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 font = pygame.font.SysFont('arial', 50)
 bullet = 0
 balls = []
 targets = []
+ball_type = 1
 
 
 clock = pygame.time.Clock()
 gun = Gun(screen)
 spawn_targets()
-#target = Target()
 finished = False
 
 while not finished:
@@ -348,17 +378,22 @@ while not finished:
     gun.draw()
     draw_targets(targets)
     balls_live_test(balls)
+    print_ball_type()
     pygame.display.update()
     clock.tick(FPS)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             finished = True
-        elif event.type == pygame.MOUSEBUTTONDOWN:
+        elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             gun.fire2_start(event)
-        elif event.type == pygame.MOUSEBUTTONUP:
+        elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
             gun.fire2_end(event)
         elif event.type == pygame.MOUSEMOTION:
             gun.targetting(event)
+        elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 3:
+            ball_type += 1
+            if ball_type == 4:
+                ball_type = 1
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_a:
                 gun.gun_move_x_left()
