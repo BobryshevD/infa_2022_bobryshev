@@ -241,6 +241,53 @@ class GreenTarget(Target):
             self.y += self.vy
 
 
+class YellowTarget(Target):
+    def new_target(self):
+        """ Инициализация новой цели. """
+        x = self.x = randint(550, 745)
+        y = self.y = randint(200, 400)
+        r = self.r = randint(15, 50)
+        vx = self.vx = randint(-5, 5)
+        vy = self.vy = randint(-5, 5)
+        self.live = 1
+        self.time = 0
+        color = self.color = YELLOW
+
+    def draw(self):
+        """Рисует цель"""
+        if self.live != 0:
+            pygame.draw.circle(screen, self.color, (self.x, self.y), self.r)
+            if (self.x+self.r > 800) or (self.x-self.r < 300):
+                self.vx = -self.vx
+            if (self.y+self.r > 550) or (self.y-self.r < 0):
+                self.vy = -self.vy
+            if self.vx > 0:
+                self.vx += 0.15
+            else:
+                self.vx -= 0.15
+            if self.vy > 0:
+                self.vy += 0.15
+            else:
+                self.vy -= 0.15
+            if self.vx**2 > 600:
+                self.x = randint(450, 745)
+                self.vx = 0
+            if self.vy**2 > 600:
+                self.y = randint(100, 500)
+                self.vy = 0
+            self.x += self.vx
+            self.y += self.vy
+
+    def hit(self):
+        """Попадание шарика в цель."""
+        global score
+        score += 2
+        print("Попадание в жёлтый шарик! Очки:", score)
+
+
+
+
+
 def spawn_targets():
     """Создаёт цели"""
     target1 = Target()
@@ -249,6 +296,9 @@ def spawn_targets():
     targets.append(target2)
     target3 = GreenTarget()
     targets.append(target3)
+    target4 = YellowTarget()
+    targets.append(target4)
+
 
 
 def draw_targets(targets):
