@@ -99,6 +99,9 @@ class Gun:
         self.f2_on = 0
         self.an = 1
         self.color = GREY
+        self.color_corp = BLUE
+        self.x = 40
+        self.y = 450
 
     def fire2_start(self, event):
         self.f2_on = 1
@@ -111,7 +114,7 @@ class Gun:
         """
         global balls, bullet
         bullet += 1
-        new_ball = Ball(self.screen)
+        new_ball = Ball(self.screen, self.x, self.y)
         new_ball.r += 5
         self.an = math.atan2((event.pos[1]-new_ball.y), (event.pos[0]-new_ball.x))
         new_ball.vx = self.f2_power * math.cos(self.an)
@@ -133,16 +136,33 @@ class Gun:
             self.color = GREY
 
     def draw(self):
-        pygame.draw.line(self.screen, self.color, (40,450), (40+5*self.f2_power*math.cos(self.an), 450+5*self.f2_power*math.sin(self.an)), 25)
-
+        pygame.draw.rect(self.screen, self.color_corp, (self.x - 35, self.y - 35, 55, 70))
+        pygame.draw.line(self.screen, self.color, (self.x, self.y), (self.x+5*self.f2_power*math.cos(self.an), self.y+5*self.f2_power*math.sin(self.an)), 25)
+        
 
     def power_up(self):
         if self.f2_on:
-            if self.f2_power < 100:
+            if self.f2_power < 70:
                 self.f2_power += 1
             self.color = RED
         else:
             self.color = GREY
+
+    def gun_move_x_left(self):
+        if self.x >= 30:
+            self.x -= 5
+
+    def gun_move_x_right(self):
+        if self.x <= 300:
+            self.x += 5
+
+    def gun_move_y_up(self):
+        if self.y >= 200:
+            self.y -= 5
+
+    def gun_move_y_down(self):
+        if self.y <= 475:
+            self.y += 5
 
 
 class Target:
@@ -339,7 +359,15 @@ while not finished:
             gun.fire2_end(event)
         elif event.type == pygame.MOUSEMOTION:
             gun.targetting(event)
-
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_a:
+                gun.gun_move_x_left()
+            elif event.key == pygame.K_d:
+                gun.gun_move_x_right()
+            elif event.key == pygame.K_w:
+                gun.gun_move_y_up()
+            elif event.key == pygame.K_s:
+                gun.gun_move_y_down()
     for b in balls:
         b.move()
     gun.power_up()
