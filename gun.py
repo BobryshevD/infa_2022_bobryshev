@@ -68,6 +68,7 @@ class Ball:
 
 
     def draw(self):
+        """Рисует снаряд"""
         pygame.draw.circle(
             self.screen,
             self.color,
@@ -89,17 +90,6 @@ class Ball:
             return False
 
 
-
-
-def balls_live_test(balls):
-    """Удаляет шарики, у которых self.live = 0"""
-    global b
-    for b in balls:
-        b.draw()
-        if b.live == 0:
-            balls.remove(b)
-
-
 class Gun:
     def __init__(self, screen):
         self.screen = screen
@@ -112,6 +102,7 @@ class Gun:
         self.y = 450
 
     def fire2_start(self, event):
+        """Начало заряжания пушки"""
         self.f2_on = 1
 
     def fire2_end(self, event):
@@ -160,11 +151,12 @@ class Gun:
             self.color = GREY
 
     def draw(self):
+        """Рисует танк"""
         pygame.draw.rect(self.screen, self.color_corp, (self.x - 35, self.y - 35, 55, 70))
         pygame.draw.line(self.screen, self.color, (self.x, self.y), (self.x+5*self.f2_power*math.cos(self.an), self.y+5*self.f2_power*math.sin(self.an)), 25)
 
-
     def power_up(self):
+        """Заряжает пушку"""
         if self.f2_on:
             if self.f2_power < 50:
                 self.f2_power += 1
@@ -173,21 +165,24 @@ class Gun:
             self.color = GREY
 
     def gun_move_x_left(self):
+        """Перемещает влево"""
         if self.x >= 30:
             self.x -= 5
 
     def gun_move_x_right(self):
+        """Перемещает вправо"""
         if self.x <= 300:
             self.x += 5
 
     def gun_move_y_up(self):
+        """Перемещает вверх"""
         if self.y >= 200:
             self.y -= 5
 
     def gun_move_y_down(self):
+        """Перемещает вниз"""
         if self.y <= 475:
             self.y += 5
-
 
 
 class Target:
@@ -294,6 +289,7 @@ class GreenTarget(Target):
 
 
 class YellowTarget(Target):
+    """Жёлтая цель: двигается ускоренно, появляется в рандомной точке после превышения скоростью определённого порога"""
     def new_target(self):
         """ Инициализация новой цели. """
         x = self.x = randint(550, 745)
@@ -337,6 +333,60 @@ class YellowTarget(Target):
         print("Попадание в жёлтый шарик! Очки:", score)
 
 
+class Bomber:
+    def __init__(self, screen,  y = 20, x = 0, color = BLACK):
+        y = self.y = 20
+        x = self.x = 10
+        color = self.color = BLACK
+        self.screen = screen
+
+    def draw(self):
+        """Рисует бомбардировщик"""
+        pygame.draw.rect(screen, self.color, (self.x, self.y, 80, 20))
+
+    def move_x_right(self):
+        """Перемещает бомбардировщик влево"""
+        if self.x < 300:
+            self.x += 5
+
+    def move_x_left(self):
+        """Перемещает бомбардировщик вправо"""
+        if self.x > 0:
+            self.x -= 5
+
+    def create_bomb(self):
+        """Создаёт бомбу"""
+        new_bomb = Bomb()
+        new_bomb.x = self.x + 40
+        new_bomb.y = self.y + 5
+        new_bomb.r = 10
+        new_bomb.vy = 5
+        new_bomb.color = BLACK
+        new_bomb.live = 1
+        new_bomb.screen = self.screen
+        bombs.append(new_bomb)
+
+
+class Bomb:
+    def __init__(self):
+        self.x = 0
+        self.y = 0
+        self.vy = 0
+        self.r = 5
+        self.color = BLACK
+        self.live = 1
+        self.screen = screen
+
+    def draw(self):
+        """Рисует бомбы"""
+        if self.live == 1:
+            pygame.draw.circle(self.screen, self.color, (self.x, self.y), self.r)
+
+    def move(self):
+        """Перемещает бомбу"""
+        self.y += self.vy
+        if self.y >= 550:
+            self.live = 0
 
 
 
@@ -352,7 +402,6 @@ def spawn_targets():
     targets.append(target4)
 
 
-
 def draw_targets(targets):
     """"Рисует цели, проверяет на попадание"""
     for target in targets:
@@ -362,13 +411,44 @@ def draw_targets(targets):
 
 
 def print_ball_type():
+    """Пишет тип снаряда в углу экрана"""
     text = font.render(f'Тип снаряда: {ball_type}', True, BLACK)
     screen.blit(text, (0, 560))
 
 
 def info():
+    """Пишет информацию в углу экрана"""
     text = font_small.render('Передвижение танка: WASD, смена типа снаряда - ПКМ', True, BLACK)
     screen.blit(text, (362, 580))
+
+def balls_live_test(balls):
+    """Удаляет шарики, у которых self.live = 0"""
+    global b
+    for b in balls:
+        b.draw()
+        if b.live == 0:
+            balls.remove(b)
+
+
+def bombs_live_test(bombs):
+    """Рисует бомбы и удаляет те, у которых self.live = 0"""
+    for bomb in bombs:
+        bomb.draw()
+        if bomb.live == 0:
+            bombs.remove(bomb)
+
+
+def bomb_hittest(obj, bombs):
+    """Проверяет, коснулась ли бомба танка"""
+    for bomb in bombs:
+        if (bomb.x+bomb.r <= obj.x+35) & (bomb.x-bomb.r >= obj.x-50) & (bomb.y+bomb.r >= obj.y-30):
+            return True
+
+
+def end_of_game():
+    """"Выводит на экран сообщение об окончании игры"""
+    text = font.render(f'Вы проиграли!', True, BLACK)
+    screen.blit(text, (300, 250))
 
 
 pygame.init()
@@ -378,21 +458,28 @@ font_small = pygame.font.SysFont('arial', 20)
 bullet = 0
 balls = []
 targets = []
+bombs = []
 ball_type = 1
 
 
 clock = pygame.time.Clock()
 gun = Gun(screen)
+bomber = Bomber(screen)
 spawn_targets()
 finished = False
 
 while not finished:
     screen.fill(WHITE)
-    gun.draw()
-    draw_targets(targets)
-    balls_live_test(balls)
-    print_ball_type()
-    info()
+    if bomb_hittest(gun, bombs):
+        end_of_game()
+    else:
+        gun.draw()
+        draw_targets(targets)
+        balls_live_test(balls)
+        bombs_live_test(bombs)
+        print_ball_type()
+        info()
+        bomber.draw()
     pygame.display.update()
     clock.tick(FPS)
     for event in pygame.event.get():
@@ -417,8 +504,16 @@ while not finished:
                 gun.gun_move_y_up()
             elif event.key == pygame.K_s:
                 gun.gun_move_y_down()
+            elif event.key == pygame.K_LEFT:
+                bomber.move_x_left()
+            elif event.key == pygame.K_RIGHT:
+                bomber.move_x_right()
+            elif event.key == pygame.K_SPACE:
+                bomber.create_bomb()
     for b in balls:
         b.move()
+    for bomb in bombs:
+        bomb.move()
     gun.power_up()
 
 pygame.quit()
